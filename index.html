@@ -155,7 +155,6 @@
         let pathData = "M0,200";
         let cashedOut = false;
         let cashoutMultiplier = 0;
-        let gameCrashed = false;
 
         function updateBalance() {
             document.getElementById('balance').textContent = balance.toFixed(2);
@@ -176,7 +175,7 @@
         }
 
         function placeBet() {
-            if (gameRunning || !gameCrashed) return; // Prevent placing a new bet while the game is running or has crashed
+            if (gameRunning) return; // Prevent placing a new bet while the game is running
             if (interval) {
                 clearInterval(interval);
             }
@@ -194,7 +193,6 @@
             updateBalance();
         }
 
-
         function startGame() {
             if (interval) {
                 clearInterval(interval);
@@ -203,7 +201,6 @@
             pathData = "M0,200";
             updateMultiplier();
             updateLine();
-            gameCrashed = false; // 遊戲開始時，將gameCrashed設為false
             interval = setInterval(() => {
                 if (Math.random() < getProbability(multiplier)) {
                     clearInterval(interval);
@@ -211,10 +208,10 @@
                     document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
                     document.getElementById('multiplier').style.color = 'red';
                     gameRunning = false;
-                    gameCrashed = true; // 當crash發生時，將gameCrashed設為true
                     betAmount = 0; // Clear the bet amount since it crashed
                 } else {
                     multiplier += 0.01; // 快速乘數增量
+                    updateMultiplier();
                     const x = (multiplier-1) * 80;
                     let y;
 
@@ -226,12 +223,11 @@
                         pathData += ` L${x},${y}`;
                     }
 
-                    updateMultiplier();
                     updateLine();
+
                 }
             }, 150); // multiplier更新間隔
         }
-
 
         function getProbability(x) {
             const lower = (x - 1) / x;
