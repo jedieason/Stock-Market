@@ -231,10 +231,9 @@
         }
 
         function getProbability(x) {
-            // 機率公式為[(x-1)/x - (x-0.99)/(x-0.01)]
             const lower = (x - 1) / x;
-            const upper = (x - 0.99) / (x - 0.01);
-            return lower - upper;
+            const upper = (x - 0.99) / (x + 0.01);
+            return upper - lower;
         }
 
         function cashOut() {
