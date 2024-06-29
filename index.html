@@ -116,6 +116,8 @@
             padding: 5px 10px;
             border-radius: 5px;
             color: #fff;
+            opacity: 1;
+            transition: opacity 1s ease-out;
         }
     </style>
 </head>
@@ -150,17 +152,17 @@
         let multiplier = 1.00;
         let gameRunning = false;
         let interval;
-        let crashPoint;
         let pathData = "M0,200";
         let cashedOut = false;
         let cashoutMultiplier = 0;
+        let gameCrashed = false;
 
         function updateBalance() {
             document.getElementById('balance').textContent = balance.toFixed(2);
         }
 
         function updateMultiplier() {
-            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + '×';
         }
 
         function updateLine() {
@@ -174,61 +176,62 @@
         }
 
         function placeBet() {
-            if (gameRunning) return; // Prevent placing a new bet while the game is running
+            if (gameRunning || gameCrashed) return; // Prevent placing a new bet while the game is running or has crashed
             if (interval) {
                 clearInterval(interval);
             }
             document.getElementById('multiplier').classList.remove('crashed');
             document.getElementById('multiplier').style.color = '#fff';
             betAmount = parseFloat(document.getElementById('betAmount').value);
-            if (betAmount > 0 && betAmount <= balance) {
-                balance -= betAmount;
-                gameRunning = true;
-                cashedOut = false;
-                startGame();
-            } else {
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
                 alert('Invalid bet amount');
+                return;
             }
+            balance -= betAmount;
+            gameRunning = true;
+            cashedOut = false;
+            startGame();
             updateBalance();
         }
 
+
         function startGame() {
+            if (interval) {
+                clearInterval(interval);
+            }
             multiplier = 1.00;
             pathData = "M0,200";
             updateMultiplier();
             updateLine();
-            crashPoint = getRandomCrashPoint();
+            gameCrashed = false; // 遊戲開始時，將gameCrashed設為false
             interval = setInterval(() => {
-                if (multiplier >= crashPoint) {
+                if (Math.random() < getProbability(multiplier)) {
                     clearInterval(interval);
                     document.getElementById('multiplier').classList.add('crashed');
-                    document.getElementById('multiplier').textContent = 'Crashed at ' + crashPoint.toFixed(2) + 'x';
+                    document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
                     document.getElementById('multiplier').style.color = 'red';
                     gameRunning = false;
+                    gameCrashed = true; // 當crash發生時，將gameCrashed設為true
                     betAmount = 0; // Clear the bet amount since it crashed
                 } else {
                     multiplier += 0.01; // 快速乘數增量
-                    const x = multiplier * 80;
-                    const y = 200 - (multiplier * multiplier * 8); // Quadratic curve
-                    pathData += ` L${x},${y}`;
+                    const x = (multiplier-1) * 80;
+                    let y;
+
+                    if (x >= 400) { // 如果曲線達到畫布的最右側
+                        y = 200 - ((multiplier-1) * (multiplier-1) * 8 + Math.pow(multiplier - 5, 2));
+                        pathData += ` L400,${y}`; // 固定 x 為 400，更新 y
+                    } else {
+                        y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
+                        pathData += ` L${x},${y}`;
+                    }
+
                     updateMultiplier();
                     updateLine();
                 }
-            }, 50); // Faster interval
+            }, 150); // multiplier更新間隔
         }
 
-        function getRandomCrashPoint() {
-            let x = 1.00;
-
-            while (true) {
-                const random = Math.random(); // 生成0到1之間的隨機數
-                const probability = getProbability(x);
-                if (random < probability) {
-                    return parseFloat(x.toFixed(2)); // 返回精確到小數點後兩位的倍數
-                }
-                x += 0.01; // 每次增加0.01倍數
-            }
-        }
 
         function getProbability(x) {
             const lower = (x - 1) / x;
@@ -237,10 +240,9 @@
         }
 
         function cashOut() {
-            if (gameRunning) {
+            if (gameRunning && !cashedOut) {
                 clearInterval(interval);
                 balance += betAmount * multiplier;
-                alert('You cashed out at ' + multiplier.toFixed(2) + 'x');
                 gameRunning = false;
                 cashedOut = true;
                 cashoutMultiplier = multiplier;
@@ -248,6 +250,7 @@
                 document.getElementById('multiplier').classList.remove('crashed');
                 document.getElementById('multiplier').style.color = '#fff';
                 showCashoutInfo();
+                resumeGameAfterCashout(); // 繼續動畫直到爆炸
             }
         }
 
@@ -262,6 +265,34 @@
             cashoutInfo.className = 'cashout-info';
             cashoutInfo.textContent = `Cashed out at ${cashoutMultiplier.toFixed(2)}x`;
             chart.appendChild(cashoutInfo);
+            setTimeout(() => {
+                cashoutInfo.style.opacity = '0';
+                setTimeout(() => {
+                    chart.removeChild(cashoutInfo);
+                }, 1000); // 1秒後移除元素
+            }, 1000); // 1秒後開始淡出
+        }
+
+        function resumeGameAfterCashout() {
+            if (interval) {
+                clearInterval(interval);
+            }
+            interval = setInterval(() => {
+                if (Math.random() < getProbability(multiplier)) {
+                    clearInterval(interval);
+                    document.getElementById('multiplier').classList.add('crashed');
+                    document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
+                    document.getElementById('multiplier').style.color = 'red';
+                    gameRunning = false;
+                } else {
+                    multiplier += 0.01; // 快速乘數增量
+                    const x = (multiplier-1) * 80;
+                    const y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
+                    pathData += ` L${x},${y}`;
+                    updateMultiplier();
+                    updateLine();
+                }
+            }, 150); // multiplier更新間隔
         }
 
         updateBalance();
