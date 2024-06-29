@@ -222,9 +222,10 @@
                             y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
                             pathData += ` L${x},${y}`;
                         }
+                        updateLine();
                     }
 
-                    updateLine();
+                    
 
                 }
             }, 150); // multiplier更新間隔
