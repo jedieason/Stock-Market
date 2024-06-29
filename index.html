@@ -176,7 +176,7 @@
         }
 
         function placeBet() {
-            if (gameRunning || gameCrashed) return; // Prevent placing a new bet while the game is running or has crashed
+            if (gameRunning || !gameCrashed) return; // Prevent placing a new bet while the game is running or has crashed
             if (interval) {
                 clearInterval(interval);
             }
