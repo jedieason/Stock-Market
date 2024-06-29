@@ -107,6 +107,16 @@
             stroke: #000;
             stroke-width: 2;
         }
+        .cashout-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -142,6 +152,8 @@
         let interval;
         let crashPoint;
         let pathData = "M0,200";
+        let cashedOut = false;
+        let cashoutMultiplier = 0;
 
         function updateBalance() {
             document.getElementById('balance').textContent = balance.toFixed(2);
@@ -172,6 +184,7 @@
             if (betAmount > 0 && betAmount <= balance) {
                 balance -= betAmount;
                 gameRunning = true;
+                cashedOut = false;
                 startGame();
             } else {
                 alert('Invalid bet amount');
@@ -195,7 +208,7 @@
                     betAmount = 0; // Clear the bet amount since it crashed
                 } else {
                     multiplier += 0.01; // 快速乘數增量
-                    const x = (multiplier - 1) * 80; // 往左平移
+                    const x = multiplier * 80;
                     const y = 200 - (multiplier * multiplier * 8); // Quadratic curve
                     pathData += ` L${x},${y}`;
                     updateMultiplier();
@@ -230,15 +243,26 @@
                 balance += betAmount * multiplier;
                 alert('You cashed out at ' + multiplier.toFixed(2) + 'x');
                 gameRunning = false;
+                cashedOut = true;
+                cashoutMultiplier = multiplier;
                 updateBalance();
                 document.getElementById('multiplier').classList.remove('crashed');
                 document.getElementById('multiplier').style.color = '#fff';
+                showCashoutInfo();
             }
         }
 
         function setBetPercentage(percentage) {
             const amount = balance * (percentage / 100);
             document.getElementById('betAmount').value = amount.toFixed(2);
+        }
+
+        function showCashoutInfo() {
+            const chart = document.getElementById('chart');
+            const cashoutInfo = document.createElement('div');
+            cashoutInfo.className = 'cashout-info';
+            cashoutInfo.textContent = `Cashed out at ${cashoutMultiplier.toFixed(2)}x`;
+            chart.appendChild(cashoutInfo);
         }
 
         updateBalance();
