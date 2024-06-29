@@ -212,15 +212,16 @@
                 } else {
                     multiplier += 0.01; // 快速乘數增量
                     updateMultiplier();
-                    const x = (multiplier-1) * 80;
-                    let y;
-
-                    if (x >= 400) { // 如果曲線達到畫布的最右側
-                        y = 200 - ((multiplier-1) * (multiplier-1) * 8 + Math.pow(multiplier - 5, 2));
-                        pathData += ` L400,${y}`; // 固定 x 為 400，更新 y
-                    } else {
-                        y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
-                        pathData += ` L${x},${y}`;
+                    for (let i = 0; i < 3; i++) {
+                        const x = (multiplier-1) * 80;
+                        let y;
+                        if (x >= 400) { // 如果曲線達到畫布的最右側
+                            y = 200 - ((multiplier-1) * (multiplier-1) * 8 + Math.pow(multiplier - 5, 2));
+                            pathData += ` L400,${y}`; // 固定 x 為 400，更新 y
+                        } else {
+                            y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
+                            pathData += ` L${x},${y}`;
+                        }
                     }
 
                     updateLine();
@@ -251,7 +252,7 @@
         }
 
         function setBetPercentage(percentage) {
-            if (gameRunning || !cashedOut) return;
+            if (gameRunning && !cashedOut) return;
             const amount = balance * (percentage / 100);
             document.getElementById('betAmount').value = amount.toFixed(2);
         }
@@ -283,11 +284,13 @@
                     gameRunning = false;
                 } else {
                     multiplier += 0.01; // 快速乘數增量
-                    const x = (multiplier-1) * 80;
-                    const y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
-                    pathData += ` L${x},${y}`;
                     updateMultiplier();
-                    updateLine();
+                    for (let i = 0; i < 3; i++) {
+                        const x = (multiplier-1) * 80;
+                        const y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
+                        pathData += ` L${x},${y}`;
+                        updateLine();
+                    }
                 }
             }, 150); // multiplier更新間隔
         }
