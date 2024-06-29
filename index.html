@@ -175,7 +175,7 @@
         }
 
         function placeBet() {
-            if (gameRunning) return; // Prevent placing a new bet while the game is running
+            if (gameRunning && !cashedOut) return; // Prevent placing a new bet while the game is running
             if (interval) {
                 clearInterval(interval);
             }
@@ -251,6 +251,7 @@
         }
 
         function setBetPercentage(percentage) {
+            if (gameRunning || !cashedOut) return;
             const amount = balance * (percentage / 100);
             document.getElementById('betAmount').value = amount.toFixed(2);
         }
