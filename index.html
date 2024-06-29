@@ -218,10 +218,10 @@
         }
 
         function getRandomCrashPoint() {
-            const random = Math.random(); // 生成0到1之間的隨機數
             let x = 1.00;
 
             while (true) {
+                const random = Math.random(); // 生成0到1之間的隨機數
                 const probability = getProbability(x);
                 if (random < probability) {
                     return parseFloat(x.toFixed(2)); // 返回精確到小數點後兩位的倍數
