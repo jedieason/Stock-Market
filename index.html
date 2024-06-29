@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1c1c1c;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            width: 95%; /* 畫面佔螢幕寬度的95% */
+            max-width: 400px;
+        }
+        .balance {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        .chart {
+            width: 100%;
+            height: 200px;
+            background-color: #333;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .multiplier {
+            font-size: 2em;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .crashed {
+            color: red;
+        }
+        .bet-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .bet-controls input {
+            width: 60%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .bet-controls button {
+            width: 30%; /* 縮小按鈕寬度 */
+            padding: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: #fff;
+        }
+        .percentage-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .percentage-controls button {
+            width: 22%;
+            padding: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+        }
+        .cashout-controls {
+            margin-top: 20px;
+        }
+        .cashout-controls button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .line {
+            stroke: #fff;
+            stroke-width: 3;
+            fill: none;
+        }
+        .ball {
+            fill: #fff;
+            stroke: #000;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stock Market</h1>
+        <div class="balance">Balance: <span id="balance">1000</span> BTC</div>
+        <div class="chart" id="chart">
+            <div class="multiplier" id="multiplier">1.00x</div>
+            <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none">
+                <path id="line" class="line" d="M0,200" />
+                <circle id="ball" class="ball" cx="0" cy="200" r="5" />
+            </svg>
+        </div>
+        <div class="bet-controls">
+            <input type="number" id="betAmount" placeholder="Bet Amount" min="0" step="0.01">
+            <button onclick="placeBet()">Place Bet</button>
+        </div>
+        <div class="percentage-controls">
+            <button onclick="setBetPercentage(10)">10%</button>
+            <button onclick="setBetPercentage(25)">25%</button>
+            <button onclick="setBetPercentage(50)">50%</button>
+            <button onclick="setBetPercentage(100)">100%</button>
+        </div>
+        <div class="cashout-controls">
+            <button onclick="cashOut()">Cash Out</button>
+        </div>
+    </div>
+    <script>
+        let balance = 1000;
+        let betAmount = 0;
+        let multiplier = 1.00;
+        let gameRunning = false;
+        let interval;
+        let crashPoint;
+        let pathData = "M0,200";
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance.toFixed(2);
+        }
+
+        function updateMultiplier() {
+            document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
+        }
+
+        function updateLine() {
+            const path = document.getElementById('line');
+            path.setAttribute('d', pathData);
+
+            const ball = document.getElementById('ball');
+            const lastPoint = pathData.split(' ').pop().substring(1).split(',');
+            ball.setAttribute('cx', lastPoint[0]);
+            ball.setAttribute('cy', lastPoint[1]);
+        }
+
+        function placeBet() {
+            if (gameRunning) return; // Prevent placing a new bet while the game is running
+            if (interval) {
+                clearInterval(interval);
+            }
+            document.getElementById('multiplier').classList.remove('crashed');
+            document.getElementById('multiplier').style.color = '#fff';
+            betAmount = parseFloat(document.getElementById('betAmount').value);
+            if (betAmount > 0 && betAmount <= balance) {
+                balance -= betAmount;
+                gameRunning = true;
+                startGame();
+            } else {
+                alert('Invalid bet amount');
+            }
+            updateBalance();
+        }
+
+        function startGame() {
+            multiplier = 1.00;
+            pathData = "M0,200";
+            updateMultiplier();
+            updateLine();
+            crashPoint = getRandomCrashPoint();
+            interval = setInterval(() => {
+                if (multiplier >= crashPoint) {
+                    clearInterval(interval);
+                    document.getElementById('multiplier').classList.add('crashed');
+                    document.getElementById('multiplier').textContent = 'Crashed at ' + crashPoint.toFixed(2) + 'x';
+                    document.getElementById('multiplier').style.color = 'red';
+                    gameRunning = false;
+                    betAmount = 0; // Clear the bet amount since it crashed
+                } else {
+                    multiplier += 0.01; // 快速乘數增量
+                    const x = (multiplier - 1) * 80; // 往左平移
+                    const y = 200 - (multiplier * multiplier * 8); // Quadratic curve
+                    pathData += ` L${x},${y}`;
+                    updateMultiplier();
+                    updateLine();
+                }
+            }, 50); // Faster interval
+        }
+
+        function getRandomCrashPoint() {
+            const random = Math.random(); // 生成0到1之間的隨機數
+            let x = 1.00;
+
+            while (true) {
+                const probability = getProbability(x);
+                if (random < probability) {
+                    return parseFloat(x.toFixed(2)); // 返回精確到小數點後兩位的倍數
+                }
+                x += 0.01; // 每次增加0.01倍數
+            }
+        }
+
+        function getProbability(x) {
+            // 機率公式為[(x-1)/x - (x-0.99)/(x-0.01)]
+            const lower = (x - 1) / x;
+            const upper = (x - 0.99) / (x - 0.01);
+            return lower - upper;
+        }
+
+        function cashOut() {
+            if (gameRunning) {
+                clearInterval(interval);
+                balance += betAmount * multiplier;
+                alert('You cashed out at ' + multiplier.toFixed(2) + 'x');
+                gameRunning = false;
+                updateBalance();
+                document.getElementById('multiplier').classList.remove('crashed');
+                document.getElementById('multiplier').style.color = '#fff';
+            }
+        }
+
+        function setBetPercentage(percentage) {
+            const amount = balance * (percentage / 100);
+            document.getElementById('betAmount').value = amount.toFixed(2);
+        }
+
+        updateBalance();
+        updateMultiplier();
+    </script>
+</body>
+</html>
