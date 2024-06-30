@@ -429,7 +429,7 @@
         function getProbability(x) {
             const lower = (x - 1) / x;
             const upper = (x - 0.99) / (x + 0.01);
-            return (upper - lower) * x;
+            return (upper - lower) * x * 1.05;
         }
 
         function cashOut() {
