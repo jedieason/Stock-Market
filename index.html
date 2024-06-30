@@ -155,6 +155,7 @@
         let cashoutMultiplier = 0;
 
         function updateBalance() {
+            balance = Math.round(balance * 100) / 100;
             document.getElementById('balance').textContent = balance.toFixed(2);
         }
 
