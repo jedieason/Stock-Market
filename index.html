@@ -265,7 +265,7 @@
         <h2>股市</h2>
         <p>身為臺大醫學系的學生，你意外發現一家興櫃公司。這家公司雖然是個空殼公司，但蘊藏著巨大的投資機會。
 <br><br>
-        你決定將多年來畢生的家教收入投資進去，希望在公司負責人捲款逃跑之前，能夠從中獲利⋯</p>
+        你決定將畢生的家教收入投資進去，希望在公司負責人捲款逃跑之前，能夠從中獲利⋯</p>
     </div>
     <div class="container">
         <h1>Stock Market</h1>
@@ -302,6 +302,12 @@
         const canvasWidth = canvas.width;
         const ctx = canvas.getContext('2d');
 
+        // 设置高分辨率
+        const scale = 3; // 这里是放大倍数，可以根据需要调整
+        canvas.width = canvas.offsetWidth * scale;
+        canvas.height = canvas.offsetHeight * scale;
+        ctx.scale(scale, scale);
+
         function updateBalance() {
             balance = Math.round(balance * 100) / 100;
             document.getElementById('balance').textContent = balance.toFixed(2);
@@ -312,12 +318,14 @@
         }
 
         function updateLine() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 清除并设置新的画布大小
+            canvas.width = canvas.offsetWidth * scale;
+            canvas.height = canvas.offsetHeight * scale;
+            ctx.scale(scale, scale);
+
+            ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale);
             ctx.beginPath();
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height / scale);
             gradient.addColorStop(0, 'rgba(255, 167, 38, 0.9)');
             gradient.addColorStop(1, 'rgba(255, 167, 38, 0.5)');
 
@@ -335,20 +343,20 @@
             ctx.fillStyle = gradient;
             ctx.fill();
 
-            // 繪製線條
+            // 绘制线条
             ctx.beginPath();
             ctx.moveTo(points[0].x, points[0].y);
             for (let i = 1; i < points.length; i++) {
                 ctx.lineTo(points[i].x, points[i].y);
             }
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 13 / scale; // 调整线宽
             ctx.stroke();
 
-            // 繪製球
+            // 绘制球
             const lastPoint = points[points.length - 1];
             ctx.beginPath();
-            ctx.arc(lastPoint.x, lastPoint.y, 5, 0, 2 * Math.PI, false);
+            ctx.arc(lastPoint.x, lastPoint.y, 5 / scale, 0, 2 * Math.PI, false);
             ctx.fillStyle = '#333';
             ctx.fill();
         }
@@ -386,18 +394,16 @@
         }
 
         function getInterval(multiplier) {
-            const minInterval = 1; // 1 ms
-            const maxInterval = 2; // 150 ms
-            const scale = maxInterval - minInterval; // 範圍內的乘數變化
-            return maxInterval - (multiplier - 1) * (maxInterval - minInterval) / scale;
+            
+            if (multiplier <= 50) {
+                return 100 - multiplier * multiplier / 250 * 99;
+            }
+
+            else { return 1}
         }
 
         function gameTick() {
-            var math1 = Math.random();
-            var math2 = getProbability(multiplier);
-            console.log("random is " + math1);
-            console.log("probability is " + math2);
-            if (math1 < math2) {
+            if (Math.random() < getProbability(multiplier)) {
                 clearInterval(interval);
                 document.getElementById('multiplier').classList.add('crashed');
                 document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
@@ -407,8 +413,10 @@
             } else {
                 multiplier += 0.01; // 快速乘數增量
                 updateMultiplier();
-                const x = Math.log(multiplier) * canvasWidth * 0.35;
-                const y = 200 - (multiplier - 1) * 20;
+                const x = Math.log(multiplier) * canvasWidth * 0.6;
+                const y = 200 - (multiplier - 1) * 35;
+
+                
                 pathData += ` L${x},${y}`;
                 areaData += ` L${x},${y}`;
                 updateLine();
