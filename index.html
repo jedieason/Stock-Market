@@ -5,62 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Market</title>
     <style>
+        @keyframes fadeInZoom {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 0.9;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeOutZoom {
+            0% {
+                opacity: 0.9;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1c1c1c;
-            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            position: relative;
+            height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            align-items: center;
         }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.4em;
+            color: #333;
+        }
+
+        .intro-button {
+            position: absolute;
+            top: 25px;
+            right: 17px;
+            font-size: 1em;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        .intro-modal {
+            position: fixed;
+            top: 30%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 500px;
+            text-align: left;
+            opacity: 0;
+            animation: fadeInZoom 0.5s forwards;
+            z-index: 10;
+            display: none;
+        }
+
         .container {
             text-align: center;
-            width: 95%; /* 畫面佔螢幕寬度的95% */
-            max-width: 400px;
+            width: 100%;
+            height: calc(100%);
+            background: #fff;
+            padding: 20px;
+            box-shadow: none;
+            margin: 0;
+            box-sizing: border-box;
         }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            margin-top: 50px;
+            color: #333;
+        }
+
         .balance {
             margin: 20px 0;
-            font-size: 1.2em;
+            font-size: 1em;
+            color: #666;
         }
+
         .chart {
             width: 100%;
             height: 200px;
-            background-color: #333;
-            border-radius: 10px;
+            background-color: #e9ecef;
+            border-radius: 15px;
             position: relative;
             overflow: hidden;
             margin-bottom: 20px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
         }
+
         .multiplier {
-            font-size: 2em;
+            font-size: 1.5em;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            color: #333;
         }
+
         .crashed {
             color: red;
         }
+
         .bet-controls {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
         }
+
         .bet-controls input {
-            width: 60%;
+            width: 63%;
             padding: 10px;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 1em;
+            background: #f9f9f9;
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            outline: none;
         }
+
         .bet-controls button {
-            width: 30%; /* 縮小按鈕寬度 */
+            width: 30%;
             padding: 10px;
             font-size: 1em;
             border: none;
@@ -68,64 +153,136 @@
             cursor: pointer;
             background-color: #28a745;
             color: #fff;
+            transition: box-shadow 0.2s ease;
+            outline: none;
         }
+
+        .bet-controls button:active {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .percentage-controls {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
         }
+
         .percentage-controls button {
-            width: 22%;
+            width: 24%;
             padding: 10px;
             font-size: 1em;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            background-color: #007bff;
-            color: #fff;
+            background-color: #dedede;
+            color: #000;
+            transition: box-shadow 0.2s ease;
+            outline: none;
         }
+
+        .percentage-controls button:active {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .cashout-controls {
             margin-top: 20px;
         }
+
         .cashout-controls button {
             width: 100%;
             padding: 10px;
             font-size: 1em;
             border: none;
-            border-radius: 5px;
+            border-radius: 15px;
             cursor: pointer;
             background-color: #dc3545;
             color: #fff;
+            transition: box-shadow 0.2s ease;
+            outline: none;
         }
+
+        .cashout-controls button:active {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .line {
-            stroke: #fff;
+            stroke: #333;
             stroke-width: 3;
             fill: none;
         }
+
         .ball {
-            fill: #fff;
+            fill: #333;
         }
-        .cashout-info {
+
+        .cashout-info,
+        .alert-info {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
-            border-radius: 5px;
+            border-radius: 15px;
             color: #fff;
             opacity: 1;
             transition: opacity 1s ease-out;
         }
+
+        .alert-info {
+            background: rgba(255, 0, 0, 0.7);
+        }
+
+        .left-scale {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        .left-scale div {
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #007bff;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 </head>
 <body>
+    <div class="header">𝔑𝔗𝔘𝔐𝔈𝔇 ℭ𝔄𝔐𝔓</div>
+    <button class="intro-button" onclick="toggleIntro()">遊戲介紹</button>
+    <div id="introModal" class="intro-modal">
+        <button class="close-btn" onclick="toggleIntro()">×</button>
+        <h2>股市</h2>
+        <p>身為臺大醫學系的學生，你意外發現一家興櫃公司。這家公司雖然是個空殼公司，但蘊藏著巨大的投資機會。
+<br><br>
+        你決定將多年來畢生的家教收入投資進去，希望在公司負責人捲款逃跑之前，能夠從中獲利⋯</p>
+    </div>
     <div class="container">
         <h1>Stock Market</h1>
         <div class="balance">Balance: <span id="balance">1000</span> BTC</div>
         <div class="chart" id="chart">
             <div class="multiplier" id="multiplier">1.00x</div>
             <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="rgba(255, 167, 38, 0.9)" />
+                        <stop offset="100%" stop-color="rgba(255, 167, 38, 0.5)" />
+                    </linearGradient>
+                </defs>
+                <path id="area" fill="url(#gradient)" d="M0,200 L0,200 Z" />
                 <path id="line" class="line" d="M0,200" />
                 <circle id="ball" class="ball" cx="0" cy="200" r="5" />
             </svg>
@@ -151,6 +308,7 @@
         let gameRunning = false;
         let interval;
         let pathData = "M0,200";
+        let areaData = "M0,200";
         let cashedOut = false;
         let cashoutMultiplier = 0;
 
@@ -167,8 +325,12 @@
             const path = document.getElementById('line');
             path.setAttribute('d', pathData);
 
-            const ball = document.getElementById('ball');
+            const area = document.getElementById('area');
             const lastPoint = pathData.split(' ').pop().substring(1).split(',');
+            const x = lastPoint[0];
+            area.setAttribute('d', areaData + ` L${x},200 Z`);
+
+            const ball = document.getElementById('ball');
             ball.setAttribute('cx', lastPoint[0]);
             ball.setAttribute('cy', lastPoint[1]);
         }
@@ -179,10 +341,10 @@
                 clearInterval(interval);
             }
             document.getElementById('multiplier').classList.remove('crashed');
-            document.getElementById('multiplier').style.color = '#fff';
+            document.getElementById('multiplier').style.color = '#333';
             betAmount = parseFloat(document.getElementById('betAmount').value);
             if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
-                alert('Invalid bet amount');
+                showAlertInfo('Invalid bet amount');
                 return;
             }
             balance -= betAmount;
@@ -198,36 +360,38 @@
             }
             multiplier = 1.00;
             pathData = "M0,200";
+            areaData = "M0,200";
             updateMultiplier();
             updateLine();
-            interval = setInterval(() => {
-                if (Math.random() < getProbability(multiplier)) {
-                    clearInterval(interval);
-                    document.getElementById('multiplier').classList.add('crashed');
-                    document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
-                    document.getElementById('multiplier').style.color = 'red';
-                    gameRunning = false;
-                    betAmount = 0; // Clear the bet amount since it crashed
-                } else {
-                    multiplier += 0.01; // 快速乘數增量
-                    updateMultiplier();
-                    for (let i = 0; i < 3; i++) {
-                        const x = (multiplier-1) * 80;
-                        let y;
-                        if (x >= 400) { // 如果曲線達到畫布的最右側
-                            y = 200 - ((multiplier-1) * (multiplier-1) * 8 + Math.pow(multiplier - 5, 2));
-                            pathData += ` L400,${y}`; // 固定 x 為 400，更新 y
-                        } else {
-                            y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
-                            pathData += ` L${x},${y}`;
-                        }
-                        updateLine();
-                    }
+            interval = setInterval(gameTick, getInterval(multiplier)); // 使用動態間隔
+        }
 
-                    
+        function getInterval(multiplier) {
+            const minInterval = 1; // 1 ms
+            const maxInterval = 100; // 150 ms
+            const scale = 100; // 範圍內的乘數變化
+            return maxInterval - (multiplier - 1) * (maxInterval - minInterval) / scale;
+        }
 
-                }
-            }, 150); // multiplier更新間隔
+        function gameTick() {
+            if (Math.random() < getProbability(multiplier)) {
+                clearInterval(interval);
+                document.getElementById('multiplier').classList.add('crashed');
+                document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
+                document.getElementById('multiplier').style.color = 'red';
+                gameRunning = false;
+                betAmount = 0; // Clear the bet amount since it crashed
+            } else {
+                multiplier += 0.01; // 快速乘數增量
+                updateMultiplier();
+                const x = (multiplier - 1) * 80;
+                const y = 200 - ((multiplier - 1) * (multiplier - 1) * 8);
+                pathData += ` L${x},${y}`;
+                areaData += ` L${x},${y}`;
+                updateLine();
+                clearInterval(interval); // 清除當前interval
+                interval = setInterval(gameTick, getInterval(multiplier)); // 使用新的間隔
+            }
         }
 
         function getProbability(x) {
@@ -238,16 +402,14 @@
 
         function cashOut() {
             if (gameRunning && !cashedOut) {
-                clearInterval(interval);
                 balance += betAmount * multiplier;
                 gameRunning = false;
                 cashedOut = true;
                 cashoutMultiplier = multiplier;
                 updateBalance();
                 document.getElementById('multiplier').classList.remove('crashed');
-                document.getElementById('multiplier').style.color = '#fff';
+                document.getElementById('multiplier').style.color = '#333';
                 showCashoutInfo();
-                resumeGameAfterCashout(); // 繼續動畫直到爆炸
             }
         }
 
@@ -271,28 +433,31 @@
             }, 1000); // 1秒後開始淡出
         }
 
-        function resumeGameAfterCashout() {
-            if (interval) {
-                clearInterval(interval);
+        function showAlertInfo(message) {
+            const chart = document.getElementById('chart');
+            const alertInfo = document.createElement('div');
+            alertInfo.className = 'alert-info';
+            alertInfo.textContent = message;
+            chart.appendChild(alertInfo);
+            setTimeout(() => {
+                alertInfo.style.opacity = '0';
+                setTimeout(() => {
+                    chart.removeChild(alertInfo);
+                }, 1000); // 1秒後移除元素
+            }, 1000); // 1秒後開始淡出
+        }
+
+        function toggleIntro() {
+            const introModal = document.getElementById('introModal');
+            if (introModal.style.display === 'none' || introModal.style.display === '') {
+                introModal.style.display = 'block';
+                introModal.style.animation = 'fadeInZoom 0.5s forwards';
+            } else {
+                introModal.style.animation = 'fadeOutZoom 0.5s forwards';
+                setTimeout(() => {
+                    introModal.style.display = 'none';
+                }, 500);
             }
-            interval = setInterval(() => {
-                if (Math.random() < getProbability(multiplier)) {
-                    clearInterval(interval);
-                    document.getElementById('multiplier').classList.add('crashed');
-                    document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
-                    document.getElementById('multiplier').style.color = 'red';
-                    gameRunning = false;
-                } else {
-                    multiplier += 0.01; // 快速乘數增量
-                    updateMultiplier();
-                    for (let i = 0; i < 3; i++) {
-                        const x = (multiplier-1) * 80;
-                        const y = 200 - ((multiplier-1) * (multiplier-1) * 8); // Quadratic curve
-                        pathData += ` L${x},${y}`;
-                        updateLine();
-                    }
-                }
-            }, 150); // multiplier更新間隔
         }
 
         updateBalance();
