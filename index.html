@@ -64,16 +64,13 @@
         .intro-modal {
             position: fixed;
             top: 30%;
-            left: 5%;
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 80%;
-            max-width: 500px;
             text-align: left;
-            opacity: 0;
             animation: fadeInZoom 0.5s forwards;
             z-index: 10;
             display: none;
@@ -263,7 +260,7 @@
 <body>
     <div class="header">𝔑𝔗𝔘𝔐𝔈𝔇 ℭ𝔄𝔐𝔓</div>
     <button class="intro-button" onclick="toggleIntro()">遊戲介紹</button>
-    <div id="introModal" class="intro-modal">
+    <div id="introModal" class="intro-modal center">
         <button class="close-btn" onclick="toggleIntro()">×</button>
         <h2>股市</h2>
         <p>身為臺大醫學系的學生，你意外發現一家興櫃公司。這家公司雖然是個空殼公司，但蘊藏著巨大的投資機會。
@@ -275,17 +272,7 @@
         <div class="balance">Balance: <span id="balance">1000</span> BTC</div>
         <div class="chart" id="chart">
             <div class="multiplier" id="multiplier">1.00x</div>
-            <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none">
-                <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="rgba(255, 167, 38, 0.9)" />
-                        <stop offset="100%" stop-color="rgba(255, 167, 38, 0.5)" />
-                    </linearGradient>
-                </defs>
-                <path id="area" fill="url(#gradient)" d="M0,200 L0,200 Z" />
-                <path id="line" class="line" d="M0,200" />
-                <circle id="ball" class="ball" cx="0" cy="200" r="5" />
-            </svg>
+            <canvas id="chartCanvas" style="width: 100%; height: 200px;"></canvas>
         </div>
         <div class="bet-controls">
             <input type="number" id="betAmount" placeholder="Bet Amount" min="0" step="0.01">
@@ -311,6 +298,9 @@
         let areaData = "M0,200";
         let cashedOut = false;
         let cashoutMultiplier = 0;
+        const canvas = document.getElementById('chartCanvas');
+        const canvasWidth = canvas.width;
+        const ctx = canvas.getContext('2d');
 
         function updateBalance() {
             balance = Math.round(balance * 100) / 100;
@@ -322,18 +312,47 @@
         }
 
         function updateLine() {
-            const path = document.getElementById('line');
-            path.setAttribute('d', pathData);
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(255, 167, 38, 0.9)');
+            gradient.addColorStop(1, 'rgba(255, 167, 38, 0.5)');
 
-            const area = document.getElementById('area');
-            const lastPoint = pathData.split(' ').pop().substring(1).split(',');
-            const x = lastPoint[0];
-            area.setAttribute('d', areaData + ` L${x},200 Z`);
+            const points = pathData.split(' ').map(point => {
+                const [x, y] = point.substring(1).split(',');
+                return { x: parseFloat(x), y: parseFloat(y) };
+            });
 
-            const ball = document.getElementById('ball');
-            ball.setAttribute('cx', lastPoint[0]);
-            ball.setAttribute('cy', lastPoint[1]);
+            ctx.moveTo(0, 200);
+            points.forEach(point => {
+                ctx.lineTo(point.x, point.y);
+            });
+            ctx.lineTo(points[points.length - 1].x, 200);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // 繪製線條
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 繪製球
+            const lastPoint = points[points.length - 1];
+            ctx.beginPath();
+            ctx.arc(lastPoint.x, lastPoint.y, 5, 0, 2 * Math.PI, false);
+            ctx.fillStyle = '#333';
+            ctx.fill();
         }
+
 
         function placeBet() {
             if (gameRunning && !cashedOut) return; // Prevent placing a new bet while the game is running
@@ -368,13 +387,17 @@
 
         function getInterval(multiplier) {
             const minInterval = 1; // 1 ms
-            const maxInterval = 100; // 150 ms
-            const scale = 100; // 範圍內的乘數變化
+            const maxInterval = 2; // 150 ms
+            const scale = maxInterval - minInterval; // 範圍內的乘數變化
             return maxInterval - (multiplier - 1) * (maxInterval - minInterval) / scale;
         }
 
         function gameTick() {
-            if (Math.random() < getProbability(multiplier)) {
+            var math1 = Math.random();
+            var math2 = getProbability(multiplier);
+            console.log("random is " + math1);
+            console.log("probability is " + math2);
+            if (math1 < math2) {
                 clearInterval(interval);
                 document.getElementById('multiplier').classList.add('crashed');
                 document.getElementById('multiplier').textContent = 'Crashed at ' + multiplier.toFixed(2) + 'x';
@@ -384,8 +407,8 @@
             } else {
                 multiplier += 0.01; // 快速乘數增量
                 updateMultiplier();
-                const x = (multiplier - 1) * 80;
-                const y = 200 - ((multiplier - 1) * (multiplier - 1) * 8);
+                const x = Math.log(multiplier) * canvasWidth * 0.35;
+                const y = 200 - (multiplier - 1) * 20;
                 pathData += ` L${x},${y}`;
                 areaData += ` L${x},${y}`;
                 updateLine();
@@ -394,10 +417,11 @@
             }
         }
 
+
         function getProbability(x) {
             const lower = (x - 1) / x;
             const upper = (x - 0.99) / (x + 0.01);
-            return upper - lower;
+            return (upper - lower) * x;
         }
 
         function cashOut() {
