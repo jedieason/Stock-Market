@@ -52,7 +52,7 @@
         .intro-button {
             position: absolute;
             top: 25px;
-            right: 17px;
+            right: 90px;
             font-size: 1em;
             color: #aaa;
             cursor: pointer;
@@ -61,11 +61,53 @@
             outline: none;
         }
 
+        .register-button {
+            position: absolute;
+            top: 25px;
+            right: 44px;
+            font-size: 1em;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        .login-button {
+            position: absolute;
+            top: 22px;
+            right: 12px;
+            font-size: 1em;
+            color: #fff;
+            background: #000;
+            border: none;
+            border-radius: 6px;
+            padding: 3px 6px;
+            cursor: pointer;
+            outline: none;
+        }
+
         .intro-modal {
+            position: fixed;
+            top: 32%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            text-align: left;
+            animation: fadeInZoom 0.5s forwards;
+            z-index: 10;
+            display: none;
+        }
+
+        .register-modal,
+        .login-modal {
             position: fixed;
             top: 27%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
+            background: #fff;
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -255,17 +297,87 @@
             top: 10px;
             right: 10px;
         }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #000;
+            color: #fff;
+            transition: box-shadow 0.2s ease;
+            outline: none;
+        }
+
+        .form-group button:active {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
     <div class="header">𝔑𝔗𝔘𝔐𝔈𝔇 ℭ𝔄𝔐𝔓</div>
-    <button class="intro-button" onclick="toggleIntro()">遊戲介紹</button>
+    <button class="register-button" onclick="toggleRegister()">註冊</button>
+    <button class="login-button" onclick="toggleLogin()">登入</button>
+    <button class="intro-button" onclick="toggleIntro()">介紹</button>
     <div id="introModal" class="intro-modal center">
         <button class="close-btn" onclick="toggleIntro()">×</button>
         <h2>股市</h2>
         <p>身為臺大醫學系的學生，你意外發現一家興櫃公司。這家公司雖然是個空殼公司，但蘊藏著巨大的投資機會。負責人表示，當倍數越高，他決定惡性倒閉的可能性越低。
 <br><br>
         你決定將畢生的家教收入投資進去，希望在公司負責人捲款逃跑之前，能夠從中獲利⋯</p>
+    </div>
+    <div id="registerModal" class="register-modal center">
+        <button class="close-btn" onclick="toggleRegister()">×</button>
+        <h2>註冊</h2>
+        <div class="form-group">
+            <label for="registerUsername">帳號：</label>
+            <input type="text" id="registerUsername" placeholder="輸入帳號">
+        </div>
+        <div class="form-group">
+            <label for="registerPassword">密碼：</label>
+            <input type="password" id="registerPassword" placeholder="輸入密碼">
+        </div>
+        <div class="form-group">
+            <button onclick="register()">註冊</button>
+        </div>
+    </div>
+    <div id="loginModal" class="login-modal center">
+        <button class="close-btn" onclick="toggleLogin()">×</button>
+        <h2>登入</h2>
+        <div class="form-group">
+            <label for="loginUsername">帳號：</label>
+            <input type="text" id="loginUsername" placeholder="輸入帳號">
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">密碼：</label>
+            <input type="password" id="loginPassword" placeholder="輸入密碼">
+        </div>
+        <div class="form-group">
+            <button onclick="login()">登入</button>
+        </div>
     </div>
     <div class="container">
         <h1>Stock Market</h1>
@@ -279,14 +391,11 @@
             <button onclick="placeBet()">下單</button>
         </div>
         <div class="percentage-controls">
-
-            <button onclick="setBetRemainder()">零頭</button> <!-- 新增的零頭按鈕 -->
-
+            <button onclick="setBetRemainder()">零頭</button>
             <button onclick="setBetPercentage(10)">10%</button>
             <button onclick="setBetPercentage(25)">25%</button>
             <button onclick="setBetPercentage(50)">50%</button>
             <button onclick="setBetPercentage(100)">100%</button>
-
         </div>
         <div class="cashout-controls">
             <button onclick="cashOut()">止盈</button>
@@ -372,7 +481,7 @@
                 clearInterval(interval);
             }
             document.getElementById('multiplier').classList.remove('crashed');
-            
+
             betAmount = parseFloat(document.getElementById('betAmount').value);
             if (isNaN(betAmount) || betAmount == 0) {
                 showAlertInfo('請輸入下注金額');
@@ -382,12 +491,12 @@
                 showAlertInfo('不要鬧');
                 return;
             }
-        
+
             else if (betAmount > balance) {
                 showAlertInfo('餘額不足');
                 return;
             }
-            
+
             else {document.getElementById('multiplier').style.color = '#333';}
             balance -= betAmount;
             gameRunning = true;
@@ -511,6 +620,51 @@
                     introModal.style.display = 'none';
                 }, 500);
             }
+        }
+
+        function toggleRegister() {
+            const registerModal = document.getElementById('registerModal');
+            const loginModal = document.getElementById('loginModal');
+
+            if (registerModal.style.display === 'none' || registerModal.style.display === '') {
+                registerModal.style.display = 'block';
+                registerModal.style.animation = 'fadeInZoom 0.5s forwards';
+                loginModal.style.display = 'none';
+            } else {
+                registerModal.style.animation = 'fadeOutZoom 0.5s forwards';
+                setTimeout(() => {
+                    registerModal.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        function toggleLogin() {
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+
+            if (loginModal.style.display === 'none' || loginModal.style.display === '') {
+                loginModal.style.display = 'block';
+                loginModal.style.animation = 'fadeInZoom 0.5s forwards';
+                registerModal.style.display = 'none';
+            } else {
+                loginModal.style.animation = 'fadeOutZoom 0.5s forwards';
+                setTimeout(() => {
+                    loginModal.style.display = 'none';
+                }, 500);
+            }
+        }
+
+
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            alert(`註冊成功！帳號：${username}`);
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            alert(`登入成功！帳號：${username}`);
         }
 
         updateBalance();
