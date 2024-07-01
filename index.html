@@ -374,7 +374,15 @@
             document.getElementById('multiplier').classList.remove('crashed');
             document.getElementById('multiplier').style.color = '#333';
             betAmount = parseFloat(document.getElementById('betAmount').value);
-            if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
+            if (isNaN(betAmount)) {
+                showAlertInfo('請輸入下注金額');
+                return;
+            }
+            else if (betAmount <= 0) {
+                showAlertInfo('不要鬧');
+                return;
+            }
+            else if (betAmount > balance) {
                 showAlertInfo('餘額不足');
                 return;
             }
@@ -465,7 +473,7 @@
             const chart = document.getElementById('chart');
             const cashoutInfo = document.createElement('div');
             cashoutInfo.className = 'cashout-info';
-            cashoutInfo.textContent = `你出金於 ${cashoutMultiplier.toFixed(2)}x`;
+            cashoutInfo.textContent = `出金於 ${cashoutMultiplier.toFixed(2)}x`;
             chart.appendChild(cashoutInfo);
             setTimeout(() => {
                 cashoutInfo.style.opacity = '0';
