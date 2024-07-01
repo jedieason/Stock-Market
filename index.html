@@ -372,7 +372,7 @@
                 clearInterval(interval);
             }
             document.getElementById('multiplier').classList.remove('crashed');
-            document.getElementById('multiplier').style.color = '#333';
+            
             betAmount = parseFloat(document.getElementById('betAmount').value);
             if (isNaN(betAmount) || betAmount == 0) {
                 showAlertInfo('請輸入下注金額');
@@ -387,6 +387,8 @@
                 showAlertInfo('餘額不足');
                 return;
             }
+            
+            else {document.getElementById('multiplier').style.color = '#333';}
             balance -= betAmount;
             gameRunning = true;
             cashedOut = false;
