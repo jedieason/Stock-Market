@@ -374,7 +374,7 @@
             document.getElementById('multiplier').classList.remove('crashed');
             document.getElementById('multiplier').style.color = '#333';
             betAmount = parseFloat(document.getElementById('betAmount').value);
-            if (isNaN(betAmount)) {
+            if (isNaN(betAmount) || betAmount == 0) {
                 showAlertInfo('請輸入下注金額');
                 return;
             }
@@ -382,10 +382,7 @@
                 showAlertInfo('不要鬧');
                 return;
             }
-            else if (betAmount == 0) {
-                showAlertInfo('沒下注你要玩什麼');
-                return;
-            }
+        
             else if (betAmount > balance) {
                 showAlertInfo('餘額不足');
                 return;
