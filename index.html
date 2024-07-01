@@ -165,7 +165,7 @@
         }
 
         .percentage-controls button {
-            width: 24%;
+            width: 19%;
             padding: 10px;
             font-size: 1em;
             border: none;
@@ -279,10 +279,14 @@
             <button onclick="placeBet()">Place Bet</button>
         </div>
         <div class="percentage-controls">
+
+            <button onclick="setBetRemainder()">零頭</button> <!-- 新增的零頭按鈕 -->
+
             <button onclick="setBetPercentage(10)">10%</button>
             <button onclick="setBetPercentage(25)">25%</button>
             <button onclick="setBetPercentage(50)">50%</button>
             <button onclick="setBetPercentage(100)">100%</button>
+            
         </div>
         <div class="cashout-controls">
             <button onclick="cashOut()">Cash Out</button>
@@ -394,7 +398,7 @@
         }
 
         function getInterval(multiplier) {
-            
+
             if (multiplier <= 50) {
                 return 100 - multiplier * multiplier / 250 * 99;
             }
@@ -416,7 +420,7 @@
                 const x = Math.log(multiplier) * canvasWidth * 0.6;
                 const y = 200 - (multiplier - 1) * 35;
 
-                
+
                 pathData += ` L${x},${y}`;
                 areaData += ` L${x},${y}`;
                 updateLine();
@@ -448,6 +452,12 @@
         function setBetPercentage(percentage) {
             if (gameRunning && !cashedOut) return;
             const amount = balance * (percentage / 100);
+            document.getElementById('betAmount').value = amount.toFixed(2);
+        }
+
+        function setBetRemainder() {
+            if (gameRunning && !cashedOut) return;
+            const amount = balance % 100;
             document.getElementById('betAmount').value = amount.toFixed(2);
         }
 
