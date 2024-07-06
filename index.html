@@ -657,7 +657,7 @@
         function register() {
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
-            fetch(`https://script.google.com/macros/s/AKfycbzF6jkodmgO2oP8QY3hX4K6In9TWz_Oid4E362Q33Xm4j5jVqlZlHZGZiz-px7c6gan/exec?action=register&username=${username}&password=${password}`, {
+            fetch(`https://script.google.com/macros/s/AKfycbwKdO9_IeeJtHMiQfTzOiinHThruUUPFgjodlrP4RicaZ43EtcObh59h0v2S92VVKE/exec?action=register&username=${username}&password=${password}`, {
                 method: 'GET' // 或 'POST' 根據你的後端邏輯
             })
             .then(response => response.text())
@@ -673,7 +673,7 @@
         function login() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
-            fetch(`https://script.google.com/macros/s/AKfycbzF6jkodmgO2oP8QY3hX4K6In9TWz_Oid4E362Q33Xm4j5jVqlZlHZGZiz-px7c6gan/exec?action=login&username=${username}&password=${password}`, {
+            fetch(`https://script.google.com/macros/s/AKfycbwKdO9_IeeJtHMiQfTzOiinHThruUUPFgjodlrP4RicaZ43EtcObh59h0v2S92VVKE/exec?action=login&username=${username}&password=${password}`, {
                 method: 'GET' // 或 'POST' 根據你的後端邏輯
             })
             .then(response => response.text())
