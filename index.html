@@ -654,18 +654,33 @@
             }
         }
 
-
         function register() {
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-            alert(`註冊成功！帳號：${username}`);
-        }
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
+        fetch(`https://script.google.com/macros/s/AKfycbwqg9GMHIKL-E4rr0Joi2GAHmhprbPQ_l-_GXc8KxoI46QNc6o7Zs1c8QQy_HRosqiy/exec?action=register&username=${username}&password=${password}`)
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                if (data === "Registration successful") {
+                    document.querySelector('.register-button').textContent = username;
+                    document.querySelector('.login-button').style.display = 'none';
+                }
+            });
+    }
 
-        function login() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            alert(`登入成功！帳號：${username}`);
-        }
+    function login() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        fetch(`https://script.google.com/macros/s/AKfycbwqg9GMHIKL-E4rr0Joi2GAHmhprbPQ_l-_GXc8KxoI46QNc6o7Zs1c8QQy_HRosqiy/exec?action=login&username=${username}&password=${password}`)
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                if (data === "Login successful") {
+                    document.querySelector('.login-button').textContent = username;
+                    document.querySelector('.register-button').style.display = 'none';
+                }
+            });
+    }
 
         updateBalance();
         updateMultiplier();
