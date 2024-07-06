@@ -655,55 +655,55 @@
         }
 
         function register() {
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-            fetch(`https://script.google.com/macros/s/AKfycbxazM4PktZuxPv0aDT7KUHLOkcn86tttox6sz7qN02qdGu_sXLGfOVa-pJl7FvDN50/exec?action=register&username=${username}&password=${password}`, {
-                method: 'GET',
-                mode: 'cors'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(data => {
-                alert(data);
-                if (data === "Registration successful") {
-                    document.querySelector('.register-button').textContent = username;
-                    document.querySelector('.login-button').style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                alert('There was a problem with the registration. Please try again later.');
-            });
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
+        const url = `https://script.google.com/macros/s/AKfycbxxyA1NEnXqV9wV-ucKryQCMYEd-VBvnhkqOFXgvebSZbIBk86kyjgj7VFZwvqPDbU/exec?action=register&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+
+        fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.result);
+            if (data.result === "Registration successful") {
+            document.querySelector('.register-button').textContent = username;
+            document.querySelector('.login-button').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            alert('There was a problem with the registration. Please try again later.');
+        });
         }
 
         function login() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            fetch(`https://script.google.com/macros/s/AKfycbxazM4PktZuxPv0aDT7KUHLOkcn86tttox6sz7qN02qdGu_sXLGfOVa-pJl7FvDN50/exec?action=login&username=${username}&password=${password}`, {
-                method: 'GET',
-                mode: 'cors'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(data => {
-                alert(data);
-                if (data === "Login successful") {
-                    document.querySelector('.login-button').textContent = username;
-                    document.querySelector('.register-button').style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                alert('There was a problem with the login. Please try again later.');
-            });
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        const url = `https://script.google.com/macros/s/AKfycbxxyA1NEnXqV9wV-ucKryQCMYEd-VBvnhkqOFXgvebSZbIBk86kyjgj7VFZwvqPDbU/exec?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+
+        fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.result);
+            if (data.result === "Login successful") {
+            document.querySelector('.login-button').textContent = username;
+            document.querySelector('.register-button').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            alert('There was a problem with the login. Please try again later.');
+        });
         }
 
         updateBalance();
